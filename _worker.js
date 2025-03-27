@@ -3,15 +3,13 @@ export default {
       try {
         // 处理 OPTIONS 请求
         if (request.method === 'OPTIONS') {
-          return new Response(null, {
-            status: 204,  // 添加正确的状态码
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, HEAD',
-              'Access-Control-Allow-Headers': '*',
-              'Access-Control-Max-Age': '3000',
-            },
-          });
+          const headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, HEAD',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Max-Age': '3000',
+          };
+          return new Response('', { status: 204, headers });
         }
 
         let url = new URL(request.url);
