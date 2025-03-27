@@ -4,6 +4,7 @@ export default {
         // 处理 OPTIONS 请求
         if (request.method === 'OPTIONS') {
           return new Response(null, {
+            status: 204,  // 添加正确的状态码
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, HEAD',
