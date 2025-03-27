@@ -1,12 +1,60 @@
 export default {
     async fetch(request, env) {
-      let url = new URL(request.url);
-      const path = url.pathname.replace(/^\//, '');
-      if (path) {
-        url.hostname = 'pub-8a38c9993bf84440ad2a326d442b4635.r2.dev';
-        let new_request = new Request(url, request);
-        return fetch(new_request);
+      try {
+        // 处理 OPTIONS 请求
+        if (request.method === 'OPTIONS') {
+          return new Response(null, {
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, HEAD',
+              'Access-Control-Allow-Headers': '*',
+              'Access-Control-Max-Age': '3000',
+            },
+          });
+        }
+
+        let url = new URL(request.url);
+        const path = url.pathname.replace(/^\//, '');
+        
+        if (path) {
+          url.hostname = 'pub-8a38c9993bf84440ad2a326d442b4635.r2.dev';
+          let new_request = new Request(url, request);
+          
+          const response = await fetch(new_request);
+          
+          // 检查响应状态
+          if (!response.ok) {
+            console.error(`R2 请求失败: ${response.status} ${response.statusText}`);
+            return new Response(`R2 请求失败: ${response.status}`, { 
+              status: response.status,
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, HEAD',
+                'Access-Control-Allow-Headers': '*',
+              }
+            });
+          }
+          
+          // 克隆响应以添加 CORS 头
+          const newResponse = new Response(response.body, response);
+          newResponse.headers.set('Access-Control-Allow-Origin', '*');
+          newResponse.headers.set('Access-Control-Allow-Methods', 'GET, HEAD');
+          newResponse.headers.set('Access-Control-Allow-Headers', '*');
+          
+          return newResponse;
+        }
+        
+        return env.ASSETS.fetch(request);
+      } catch (error) {
+        console.error('Worker 执行错误:', error);
+        return new Response(`内部错误: ${error.message}`, { 
+          status: 500,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, HEAD',
+            'Access-Control-Allow-Headers': '*',
+          }
+        });
       }
-      return env.ASSETS.fetch(request);
     },
   };
